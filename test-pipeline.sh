@@ -85,13 +85,13 @@ DOC_STATUS=$(curl -s -X GET "http://localhost:3000/api/v1/documents/$DOCUMENT_ID
 
 echo "Document status: $DOC_STATUS"
 
-# Reprocess document if needed
-echo ""
-echo "🔄 Reprocessing document to ensure it's in vector DB..."
-REPROCESS_RESPONSE=$(curl -s -X POST "http://localhost:3000/api/v1/documents/$DOCUMENT_ID/reprocess" \
-  -H "Authorization: Bearer $TOKEN")
+# # Reprocess document if needed
+# echo ""
+# echo "🔄 Reprocessing document to ensure it's in vector DB..."
+# REPROCESS_RESPONSE=$(curl -s -X POST "http://localhost:3000/api/v1/documents/$DOCUMENT_ID/reprocess" \
+#   -H "Authorization: Bearer $TOKEN")
 
-echo "Reprocess response: $REPROCESS_RESPONSE"
+# echo "Reprocess response: $REPROCESS_RESPONSE"
 
 # Wait for reprocessing
 sleep 2
@@ -103,7 +103,7 @@ QA_RESPONSE=$(curl -s -X POST http://localhost:3000/api/v1/qa/ask \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "question": "What is artificial intelligence?"
+    "question": "Tell us about the doc"
   }')
 
 echo "Q&A response: $QA_RESPONSE"

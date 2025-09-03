@@ -39,6 +39,22 @@ A production-ready document question-answering system built with Node.js, featur
 -   **Containerization**: Docker and Docker Compose setup
 -   **Production Ready**: Security headers, error handling, and health checks
 
+## 🎥 Demo Video
+
+Watch the complete demonstration of the AI-Powered Document Q&A Pipeline in action:
+
+[![Demo Video](https://cdn.loom.com/assets/favicons-loom/mstile-150x150.png)](https://www.loom.com/share/eff417b6097f4bdfb69da3ee9417b636?sid=7ed6bc21-c1e9-43a1-ba40-92e3ead15e18)
+
+[🔗 **Watch Demo Video**](https://www.loom.com/share/eff417b6097f4bdfb69da3ee9417b636?sid=7ed6bc21-c1e9-43a1-ba40-92e3ead15e18)
+
+The demo showcases:
+
+-   Complete Docker setup and deployment
+-   User authentication and JWT token generation
+-   Document upload and processing
+-   AI-powered question answering with relevant context
+-   Full API testing workflow
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -54,8 +70,8 @@ A production-ready document question-answering system built with Node.js, featur
 ### 1. Clone and Setup
 
 ```bash
-git clone <repository-url>
-cd qa_pipeline
+git clone https://github.com/RuberDucky/AI-PoweredDocument-Q-A-Pipeline.git
+cd AI-PoweredDocument-Q-A-Pipeline
 npm install
 ```
 
@@ -77,7 +93,7 @@ NODE_ENV=development
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=ragPipeline
+DB_NAME=postgres
 DB_USER=postgres
 DB_PASSWORD=root
 
