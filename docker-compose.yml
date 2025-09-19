@@ -78,7 +78,7 @@ services:
         container_name: qa_pipeline_nginx
         ports:
             - '80:80'
-            - '443:443'
+            # - '443:443'  # Commented out to avoid conflict with host SSL
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf
             - ./nginx/ssl:/etc/nginx/ssl
