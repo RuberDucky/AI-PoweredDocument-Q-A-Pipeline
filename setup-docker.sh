@@ -98,7 +98,7 @@ echo ""
 echo "⏳ Waiting for application to be ready..."
 timeout=60
 while [ $timeout -gt 0 ]; do
-    if curl -s http://localhost:3000/api/v1/health &>/dev/null; then
+    if curl -s http://localhost:3001/api/v1/health &>/dev/null; then
         echo "✅ Application is ready"
         break
     fi
@@ -124,8 +124,8 @@ echo ""
 echo "📊 Services Status:"
 docker-compose ps
 echo ""
-echo "🌐 Application: http://localhost:3000"
-echo "🏥 Health check: http://localhost:3000/api/v1/health"
+echo "🌐 Application: http://localhost:3001"
+echo "🏥 Health check: http://localhost:3001/api/v1/health"
 echo "🗄️  Database: localhost:5432 (ragPipeline)"
 echo "📦 Redis: localhost:6379"
 echo ""

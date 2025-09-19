@@ -125,7 +125,7 @@ If you prefer to run without Docker:
 1. **Register a user**
 
     ```bash
-    curl -X POST http://localhost:3000/api/v1/auth/signup \
+    curl -X POST http://localhost:3001/api/v1/auth/signup \
       -H "Content-Type: application/json" \
       -d '{
         "fullName": "John Doe",
@@ -137,7 +137,7 @@ If you prefer to run without Docker:
 2. **Login**
 
     ```bash
-    curl -X POST http://localhost:3000/api/v1/auth/login \
+    curl -X POST http://localhost:3001/api/v1/auth/login \
       -H "Content-Type: application/json" \
       -d '{
         "email": "john@example.com",
@@ -148,14 +148,14 @@ If you prefer to run without Docker:
 3. **Upload a document**
 
     ```bash
-    curl -X POST http://localhost:3000/api/v1/documents/upload \
+    curl -X POST http://localhost:3001/api/v1/documents/upload \
       -H "Authorization: Bearer YOUR_JWT_TOKEN" \
       -F "document=@your-document.txt"
     ```
 
 4. **Ask a question**
     ```bash
-    curl -X POST http://localhost:3000/api/v1/qa/ask \
+    curl -X POST http://localhost:3001/api/v1/qa/ask \
       -H "Authorization: Bearer YOUR_JWT_TOKEN" \
       -H "Content-Type: application/json" \
       -d '{
@@ -238,8 +238,8 @@ qa_pipeline/
 
 ### Application
 
--   **Port**: 3000
--   **Health Check**: http://localhost:3000/api/v1/health
+-   **Port**: 3001
+-   **Health Check**: http://localhost:/api/v1/health
 
 ## Environment Variables
 
@@ -282,7 +282,7 @@ LOG_LEVEL=info
     docker-compose down
 
     # Check what's using ports
-    lsof -i :3000
+    lsof -i :3001
     lsof -i :5432
     ```
 

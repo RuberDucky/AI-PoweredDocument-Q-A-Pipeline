@@ -46,7 +46,7 @@ services:
         container_name: qa_pipeline_app
         environment:
             - NODE_ENV=production
-            - PORT=3000
+            - PORT=3001
             - DB_HOST=postgres
             - DB_PORT=5432
             - DB_NAME=ragPipeline
@@ -59,7 +59,7 @@ services:
             - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME:-qa-pipeline-index}
             - LOG_LEVEL=info
         ports:
-            - '3000:3000'
+            - '3001:3001'
         depends_on:
             postgres:
                 condition: service_healthy

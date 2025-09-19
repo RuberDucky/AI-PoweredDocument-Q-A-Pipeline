@@ -17,7 +17,7 @@ import logger from './config/logger.js';
 class App {
     constructor() {
         this.app = express();
-        this.port = process.env.PORT || 3000;
+        this.port = process.env.PORT || 3001;
     }
 
     async initialize() {

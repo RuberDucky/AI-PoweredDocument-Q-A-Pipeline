@@ -87,7 +87,7 @@ Update `.env` with your credentials:
 
 ```env
 # Server Configuration
-PORT=3000
+PORT=3001
 NODE_ENV=development
 
 # Database Configuration
@@ -118,7 +118,7 @@ Start all services:
 docker-compose up -d
 ```
 
-The application will be available at `http://localhost:3000`
+The application will be available at `http://localhost:3001`
 
 ### 4. Manual Setup
 
@@ -218,7 +218,7 @@ Content-Type: application/json
 ### 1. Register a new user
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/auth/signup \
+curl -X POST http://localhost:3001/api/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "fullName": "Alice Johnson",
@@ -230,7 +230,7 @@ curl -X POST http://localhost:3000/api/v1/auth/signup \
 ### 2. Login and get token
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/auth/login \
+curl -X POST http://localhost:3001/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "alice@spamok.com",
@@ -241,7 +241,7 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
 ### 3. Upload a document
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/documents/upload \
+curl -X POST http://localhost:3001/api/v1/documents/upload \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -F "document=@/path/to/your/document.pdf"
 ```
@@ -249,7 +249,7 @@ curl -X POST http://localhost:3000/api/v1/documents/upload \
 ### 4. Ask a question
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/qa/ask \
+curl -X POST http://localhost:3001/api/v1/qa/ask \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -336,7 +336,7 @@ npm run lint
 
 | Variable               | Description          | Required | Default           |
 | ---------------------- | -------------------- | -------- | ----------------- |
-| `PORT`                 | Server port          | No       | 3000              |
+| `PORT`                 | Server port          | No       | 3001              |
 | `NODE_ENV`             | Environment          | No       | development       |
 | `DB_HOST`              | Database host        | Yes      | localhost         |
 | `DB_PORT`              | Database port        | No       | 5432              |
@@ -403,7 +403,7 @@ docker-compose logs -f app
 ### Health Check
 
 ```bash
-curl http://localhost:3000/api/v1/health
+curl http://localhost:3001/api/v1/health
 ```
 
 ### Logs

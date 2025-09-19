@@ -6,7 +6,7 @@ echo "🧪 Testing Document Q&A Pipeline"
 echo "================================="
 
 # Check if server is running
-if ! curl -s http://localhost:3000/api/v1/health > /dev/null; then
+if ! curl -s http://localhost:3001/api/v1/health > /dev/null; then
     echo "❌ Server is not running. Please start it first with: npm run dev"
     exit 1
 fi
@@ -16,7 +16,7 @@ echo "✅ Server is running"
 # Test registration
 echo ""
 echo "📝 Testing user registration..."
-REGISTER_RESPONSE=$(curl -s -X POST http://localhost:3000/api/v1/auth/signup \
+REGISTER_RESPONSE=$(curl -s -X POST http://localhost:3001/api/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "fullName": "Test User",
@@ -29,7 +29,7 @@ echo "Registration response: $REGISTER_RESPONSE"
 # Test login
 echo ""
 echo "🔐 Testing user login..."
-LOGIN_RESPONSE=$(curl -s -X POST http://localhost:3000/api/v1/auth/login \
+LOGIN_RESPONSE=$(curl -s -X POST http://localhost:3001/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -56,7 +56,7 @@ echo "This is a test document about artificial intelligence and machine learning
 # Upload document
 echo ""
 echo "📤 Testing document upload..."
-UPLOAD_RESPONSE=$(curl -s -X POST http://localhost:3000/api/v1/documents/upload \
+UPLOAD_RESPONSE=$(curl -s -X POST http://localhost:3001/api/v1/documents/upload \
   -H "Authorization: Bearer $TOKEN" \
   -F "document=@test_document.txt")
 
@@ -80,7 +80,7 @@ sleep 3
 # Check document status
 echo ""
 echo "📋 Checking document status..."
-DOC_STATUS=$(curl -s -X GET "http://localhost:3000/api/v1/documents/$DOCUMENT_ID" \
+DOC_STATUS=$(curl -s -X GET "http://localhost:3001/api/v1/documents/$DOCUMENT_ID" \
   -H "Authorization: Bearer $TOKEN")
 
 echo "Document status: $DOC_STATUS"
@@ -88,7 +88,7 @@ echo "Document status: $DOC_STATUS"
 # # Reprocess document if needed
 # echo ""
 # echo "🔄 Reprocessing document to ensure it's in vector DB..."
-# REPROCESS_RESPONSE=$(curl -s -X POST "http://localhost:3000/api/v1/documents/$DOCUMENT_ID/reprocess" \
+# REPROCESS_RESPONSE=$(curl -s -X POST "http://localhost:3001/api/v1/documents/$DOCUMENT_ID/reprocess" \
 #   -H "Authorization: Bearer $TOKEN")
 
 # echo "Reprocess response: $REPROCESS_RESPONSE"
@@ -99,7 +99,7 @@ sleep 2
 # Test Q&A
 echo ""
 echo "❓ Testing Q&A functionality..."
-QA_RESPONSE=$(curl -s -X POST http://localhost:3000/api/v1/qa/ask \
+QA_RESPONSE=$(curl -s -X POST http://localhost:3001/api/v1/qa/ask \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
