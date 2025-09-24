@@ -1,14 +1,16 @@
 import fs from 'fs/promises';
 import path from 'path';
+import pdfParse from 'pdf-parse';
+import mammoth from 'mammoth';
 import { Document } from '../models/index.js';
 import pineconeService from './pineconeService.js';
-import claudeService from './claudeService.js';
+import aiService from './claudeService.js';
 import logger from '../config/logger.js';
 
 class DocumentService {
     constructor() {
-        this.allowedFileTypes = ['txt'];
-        this.maxFileSize = 10 * 1024 * 1024; // 10MB
+        this.allowedFileTypes = ['txt', 'pdf', 'docx', 'json'];
+        this.maxFileSize = 25 * 1024 * 1024; // 25MB (increased for PDF/DOCX)
     }
 
     async uploadDocument(file, userId) {
@@ -89,6 +91,7 @@ class DocumentService {
                     title: document.title,
                     content: document.content,
                     documentId: document.id,
+                    userId: document.uploadedBy, // Pass user ID for isolation
                 },
             ]);
 
@@ -131,12 +134,66 @@ class DocumentService {
             .slice(1)
             .toLowerCase();
 
-        if (fileExtension === 'txt') {
-            return file.buffer.toString('utf-8');
-        } else {
-            throw new Error(
-                `Unsupported file type: ${fileExtension}. Only TXT files are supported.`,
+        try {
+            switch (fileExtension) {
+                case 'txt':
+                    return file.buffer.toString('utf-8');
+
+                case 'pdf':
+                    const pdfData = await pdfParse(file.buffer);
+                    if (!pdfData.text || pdfData.text.trim().length === 0) {
+                        throw new Error(
+                            'PDF contains no extractable text content',
+                        );
+                    }
+                    return pdfData.text;
+
+                case 'docx':
+                    const docxResult = await mammoth.extractRawText({
+                        buffer: file.buffer,
+                    });
+                    if (
+                        !docxResult.value ||
+                        docxResult.value.trim().length === 0
+                    ) {
+                        throw new Error(
+                            'DOCX contains no extractable text content',
+                        );
+                    }
+                    // Log any conversion messages/warnings
+                    if (docxResult.messages && docxResult.messages.length > 0) {
+                        logger.warn(
+                            'DOCX conversion messages:',
+                            docxResult.messages,
+                        );
+                    }
+                    return docxResult.value;
+
+                case 'json':
+                    const jsonText = file.buffer.toString('utf-8');
+                    try {
+                        const jsonData = JSON.parse(jsonText);
+                        // Convert JSON to readable text format
+                        return this.jsonToReadableText(jsonData);
+                    } catch (jsonError) {
+                        throw new Error(
+                            `Invalid JSON format: ${jsonError.message}`,
+                        );
+                    }
+
+                default:
+                    throw new Error(
+                        `Unsupported file type: ${fileExtension}. Supported types: ${this.allowedFileTypes.join(
+                            ', ',
+                        )}`,
+                    );
+            }
+        } catch (error) {
+            logger.error(
+                `Error extracting text from ${fileExtension} file:`,
+                error,
             );
+            throw error;
         }
     }
 
@@ -145,6 +202,7 @@ class DocumentService {
             return { isValid: false, message: 'No file provided' };
         }
 
+        // Check file size
         if (file.size > this.maxFileSize) {
             return {
                 isValid: false,
@@ -154,17 +212,65 @@ class DocumentService {
             };
         }
 
+        // Check minimum file size
+        if (file.size < 10) {
+            return {
+                isValid: false,
+                message: 'File is too small or empty',
+            };
+        }
+
+        // Check file extension
         const fileExtension = path
             .extname(file.originalname)
             .slice(1)
             .toLowerCase();
+
         if (!this.allowedFileTypes.includes(fileExtension)) {
             return {
                 isValid: false,
-                message: `Unsupported file type. Allowed types: ${this.allowedFileTypes.join(
-                    ', ',
-                )}`,
+                message: `Unsupported file type '${fileExtension}'. Supported types: ${this.allowedFileTypes
+                    .join(', ')
+                    .toUpperCase()}`,
             };
+        }
+
+        // Additional validation by file type
+        switch (fileExtension) {
+            case 'pdf':
+                if (
+                    !file.buffer ||
+                    file.buffer[0] !== 0x25 ||
+                    file.buffer[1] !== 0x50
+                ) {
+                    return {
+                        isValid: false,
+                        message: 'Invalid PDF file format',
+                    };
+                }
+                break;
+
+            case 'docx':
+                // Basic DOCX validation (ZIP file signature)
+                if (
+                    !file.buffer ||
+                    file.buffer[0] !== 0x50 ||
+                    file.buffer[1] !== 0x4b
+                ) {
+                    return {
+                        isValid: false,
+                        message: 'Invalid DOCX file format',
+                    };
+                }
+                break;
+
+            case 'json':
+                try {
+                    JSON.parse(file.buffer.toString('utf-8'));
+                } catch (error) {
+                    return { isValid: false, message: 'Invalid JSON format' };
+                }
+                break;
         }
 
         return { isValid: true, message: 'File is valid' };
@@ -175,6 +281,59 @@ class DocumentService {
             .basename(filename, path.extname(filename))
             .replace(/[_-]/g, ' ')
             .replace(/\b\w/g, (l) => l.toUpperCase());
+    }
+
+    jsonToReadableText(jsonData) {
+        /**
+         * Convert JSON data to readable text format for better searchability
+         */
+        const convertValue = (value, key = '', depth = 0) => {
+            const indent = '  '.repeat(depth);
+
+            if (value === null) return `${key ? key + ': ' : ''}null`;
+            if (value === undefined) return `${key ? key + ': ' : ''}undefined`;
+
+            if (typeof value === 'string') {
+                return `${key ? key + ': ' : ''}${value}`;
+            }
+
+            if (typeof value === 'number' || typeof value === 'boolean') {
+                return `${key ? key + ': ' : ''}${value}`;
+            }
+
+            if (Array.isArray(value)) {
+                if (value.length === 0) return `${key ? key + ': ' : ''}[]`;
+
+                const items = value
+                    .map((item, index) => {
+                        return `${indent}  - ${convertValue(
+                            item,
+                            '',
+                            depth + 1,
+                        )}`;
+                    })
+                    .join('\n');
+
+                return `${key ? key + ':\n' : ''}${items}`;
+            }
+
+            if (typeof value === 'object') {
+                const entries = Object.entries(value);
+                if (entries.length === 0) return `${key ? key + ': ' : ''}{}`;
+
+                const props = entries
+                    .map(([k, v]) => {
+                        return `${indent}  ${convertValue(v, k, depth + 1)}`;
+                    })
+                    .join('\n');
+
+                return `${key ? key + ':\n' : ''}${props}`;
+            }
+
+            return `${key ? key + ': ' : ''}${String(value)}`;
+        };
+
+        return convertValue(jsonData);
     }
 
     async getDocuments(userId, page = 1, limit = 10) {

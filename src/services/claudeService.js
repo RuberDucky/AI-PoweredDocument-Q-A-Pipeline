@@ -1,12 +1,12 @@
-import { ChatAnthropic } from '@langchain/anthropic';
+import { ChatOpenAI } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import logger from '../config/logger.js';
 
-class ClaudeService {
+class AIService {
     constructor() {
-        this.model = new ChatAnthropic({
-            anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-            modelName: 'claude-sonnet-4-20250514',
+        this.model = new ChatOpenAI({
+            openAIApiKey: process.env.OPENAI_API_KEY,
+            modelName: 'gpt-4o-mini', // Using GPT-4o-mini for cost efficiency
             temperature: 0.1,
             maxTokens: 1000,
         });
@@ -75,7 +75,7 @@ Answer:`);
                 contextUsed: context.length,
             };
         } catch (error) {
-            logger.error('Error generating answer with Claude:', error);
+            logger.error('Error generating answer with OpenAI:', error);
             throw new Error('Failed to generate answer');
         }
     }
@@ -143,4 +143,4 @@ Provide a summary that captures the main points, key information, and essential 
     }
 }
 
-export default new ClaudeService();
+export default new AIService();

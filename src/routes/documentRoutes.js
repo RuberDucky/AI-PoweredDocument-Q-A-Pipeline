@@ -10,15 +10,33 @@ const storage = multer.memoryStorage();
 const upload = multer({
     storage,
     limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB
+        fileSize: 25 * 1024 * 1024, // 25MB (increased for PDF/DOCX)
         files: 1,
     },
     fileFilter: (req, file, cb) => {
-        const allowedTypes = ['text/plain'];
-        if (allowedTypes.includes(file.mimetype)) {
+        const allowedTypes = [
+            'text/plain', // TXT files
+            'application/pdf', // PDF files
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX files
+            'application/json', // JSON files
+            'text/json', // JSON files (alternative MIME type)
+        ];
+
+        // Also allow files based on extension for cases where MIME type might not be detected correctly
+        const fileExtension = file.originalname.toLowerCase().split('.').pop();
+        const allowedExtensions = ['txt', 'pdf', 'docx', 'json'];
+
+        if (
+            allowedTypes.includes(file.mimetype) ||
+            allowedExtensions.includes(fileExtension)
+        ) {
             cb(null, true);
         } else {
-            cb(new Error('Invalid file type. Only TXT files are allowed.'));
+            cb(
+                new Error(
+                    `Invalid file type. Supported formats: PDF, DOCX, TXT, JSON. Received: ${file.mimetype}`,
+                ),
+            );
         }
     },
 });

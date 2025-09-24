@@ -1,0 +1,54 @@
+
+
+ Oct 2019 - Nov 2023
+MNSUET-Bachelor of Science in Computer Science
+University of Engineering & Technology
+Major in Computer Science.
+Journal Research on "Efficient Mobile-Driven Automated Attendance system employing Biometric
+Authentication for University Employees”.
+Nov 2024 – AUG 2025
+Cyberify — Team Lead AI Engineer
+Building AI-enhanced web apps with LLMs, chatbots, RAG pipelines, Scraping and automation.
+Collaborating with cross-functional teams for deployment and optimization.
+June 2023 – Oct 2024
+Akodes IT Solutions — Senior Flutter Developer
+Developed Large Scale Flutter Applications in Logistics.
+Worked on medical, transportation, and business software for foreign clients.
+Jan 2022 – Feb 2023
+Key Devs — Full Stack Developer
+Built responsive websites and dashboards.
+Delivered client-tailored solutions across industries.
+Passionate and results-driven React.js Web Developer with strong expertise in full-stack development using
+React.js, Node.js, and AI integrations. Over 4 years of professional experience in building dynamic web apps,
+SaaS  platforms,  and  AI-powered  chatbots.  Proficient  in  LLMs,  LangChain,  and  AWS,  with  a  proven  track
+record of delivering production-grade software that bridges user needs and cutting-edge technologies.
+ZAIN UL ABDEEN 
+Github |  zaindev@duck.com | Portfolio | +923452029280
+FULL STACK AI-ENGINEER 
+SKILLS SUMMARY
+     PROFESSIONAL EXPERIENCE
+     EDUCATION
+PROJECTS
+CERTIFICATIONS
+Languages: JavaScript (ES6+), TypeScript, Python, Dart
+Frontend: React.js, Next.js, Tailwind CSS, Material UI, Shadcn,
+Backend: Node.js, Express.js, REST APIs, MongoDB, postgresql,
+AI & Tools: LangChain, OpenAI, Anthropic, RAG Architecture, Web Scraping, Puppeteer, playwright
+Cloud/DevOps: AWS (EC2, S3), Vercel, GitHub Actions
+Others: Git, Postman, Firebase, Docker (basic), Figma
+Soft Skills: Problem Solving, Collaboration, Rapid Learning, Agile Mindset
+Patient Bot — AI-Powered Medical Diagnosis Trainer
+An AI chatbot simulation platform where professors create virtual patients by defining symptoms, history,
+and treatments. Students interact via voice, and the system evaluates their diagnostic ability using NLP.
+Tech: React.js, Node.js, LangChain, OpenAI, ElevenLabs
+Saba Chat — RAG-based Real Estate Assistant
+A Retrieval-Augmented Generation (RAG) chatbot designed for property query automation. Enables real
+estate owners to auto-answer user queries.
+Tech: React.js, Node.js, LangChain, OpenAI, AWS
+Kleinanzeigen Automation — AI Price Negotiator
+An automation tool for scraping watch listings from Kleinanzeigen.de, comparing prices with Chrono24,
+and negotiating via AI. 
+Tech: React.js, Node.js, playwright , Web Scraping, Anthropic
+React JS Complete Guide – Udemy
+Machine Learning Algorithms – Udemy
+Flutter & Dart Mobile App Development Bootcamp – Udemy

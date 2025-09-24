@@ -72,7 +72,6 @@ services:
             - qa_pipeline_network
         restart: unless-stopped
 
-
 volumes:
     postgres_data:
     redis_data:

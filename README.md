@@ -4,11 +4,18 @@ A production-ready document question-answering system built with Node.js, featur
 
 ## 🏗️ Architecture Overview
 
-```
+````
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │   API Gateway   │    │   Node.js App   │
 │   (Client)      │───▶│   (Nginx)       │───▶│   (Express)     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+└─────────────────┘    └───────────────2. **OpenAI API Error**
+
+    ```
+    Error: Invalid API key
+    ```
+
+    - Verify `OPENAI_API_KEY` in `.env`
+    - Ensure sufficient API credits─────────────────┘
                                                         │
                         ┌─────────────────┐            │
                         │   PostgreSQL    │◀───────────┤
@@ -24,16 +31,16 @@ A production-ready document question-answering system built with Node.js, featur
                         │   Claude API    │◀───────────┘
                         │   (LLM)         │
                         └─────────────────┘
-```
+````
 
 ## ✨ Features
 
 -   **ES Modules**: Modern JavaScript with ES module syntax
 -   **Node.js 22**: Latest LTS version with enhanced performance
 -   **Authentication**: JWT-based authentication with signup/login
--   **Document Processing**: Support for PDF, DOCX, and TXT files
--   **Vector Search**: Semantic search using Pinecone vector database
--   **RAG Pipeline**: Retrieval-Augmented Generation with Claude
+-   **Document Processing**: Support for PDF, DOCX, TXT, and JSON files
+-   **Vector Search**: Semantic search using Pinecone vector database with user isolation
+-   **RAG Pipeline**: Retrieval-Augmented Generation with OpenAI GPT-4o-mini
 -   **Rate Limiting**: API protection and abuse prevention
 -   **Monitoring**: Comprehensive logging and analytics
 -   **Containerization**: Docker and Docker Compose setup
@@ -64,7 +71,7 @@ The demo showcases:
 -   PostgreSQL 16 (or use Docker)
 -   Redis 7 (optional, for caching)
 -   API Keys for:
-    -   Anthropic Claude
+    -   OpenAI (GPT-4o-mini)
     -   Pinecone
 
 ### 1. Clone and Setup
@@ -101,8 +108,8 @@ DB_PASSWORD=root
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 JWT_EXPIRES_IN=24h
 
-# Anthropic Claude API
-ANTHROPIC_API_KEY=your-anthropic-api-key
+# OpenAI API
+OPENAI_API_KEY=your-openai-api-key
 
 # Pinecone Vector Database
 PINECONE_API_KEY=your-pinecone-api-key
@@ -213,6 +220,38 @@ Content-Type: application/json
 }
 ```
 
+## 📄 Supported File Types
+
+The application now supports multiple document formats with advanced text extraction:
+
+### TXT Files
+
+-   Plain text files with UTF-8 encoding
+-   Direct content extraction
+-   Maximum size: 25MB
+
+### PDF Files
+
+-   Adobe PDF documents (all versions)
+-   Text extraction using pdf-parse library
+-   Handles encrypted PDFs (if no password required)
+-   Maximum size: 25MB
+
+### DOCX Files
+
+-   Microsoft Word documents (.docx format)
+-   Text extraction using mammoth library
+-   Preserves document structure
+-   Maximum size: 25MB
+
+### JSON Files
+
+-   Structured JSON data
+-   Automatic conversion to readable text format
+-   Validation for proper JSON syntax
+-   Nested objects and arrays supported
+-   Maximum size: 25MB
+
 ## 🏃‍♂️ Usage Examples
 
 ### 1. Register a new user
@@ -286,7 +325,7 @@ qa_pipeline/
 │   │   └── index.js             # Route aggregation
 │   ├── services/
 │   │   ├── authService.js       # Authentication service
-│   │   ├── claudeService.js     # Claude API integration
+│   │   ├── claudeService.js     # AI service (OpenAI integration)
 │   │   ├── documentService.js   # Document processing
 │   │   ├── pineconeService.js   # Vector database
 │   │   └── qaService.js         # Q&A orchestration
@@ -345,7 +384,7 @@ npm run lint
 | `DB_PASSWORD`          | Database password    | Yes      | root              |
 | `JWT_SECRET`           | JWT signing secret   | Yes      | -                 |
 | `JWT_EXPIRES_IN`       | Token expiration     | No       | 24h               |
-| `ANTHROPIC_API_KEY`    | Claude API key       | Yes      | -                 |
+| `OPENAI_API_KEY`       | OpenAI API key       | Yes      | -                 |
 | `PINECONE_API_KEY`     | Pinecone API key     | Yes      | -                 |
 | `PINECONE_ENVIRONMENT` | Pinecone environment | Yes      | -                 |
 | `PINECONE_INDEX_NAME`  | Pinecone index name  | No       | qa-pipeline-index |
@@ -358,9 +397,10 @@ npm run lint
 
 ### File Upload Limits
 
--   Maximum file size: 10MB
--   Supported formats: PDF, DOCX, TXT
+-   Maximum file size: 25MB
+-   Supported formats: PDF, DOCX, TXT, JSON
 -   Maximum files per upload: 1
+-   User isolation: Users can only access their own documents
 
 ## 🚀 Deployment
 
@@ -464,11 +504,24 @@ Available metrics:
     - Ensure sufficient API credits
 
 4. **File Upload Error**
+
     ```
     Error: File too large
     ```
-    - Check file size (max 10MB)
-    - Verify file format (PDF, DOCX, TXT only)
+
+    - Check file size (max 25MB)
+    - Verify file format (PDF, DOCX, TXT, JSON only)
+    - For PDF: Ensure file is not corrupted
+    - For DOCX: Ensure file is valid Microsoft Word format
+    - For JSON: Ensure valid JSON syntax
+
+5. **User Isolation Error**
+    ```
+    Error: Document not found or access denied
+    ```
+    - Users can only access their own documents
+    - Verify JWT token is valid and belongs to correct user
+    - Check document ownership in database
 
 ### Debug Mode
 
@@ -492,7 +545,7 @@ This project is licensed under the ISC License.
 
 ## 🙏 Acknowledgments
 
--   [Anthropic](https://www.anthropic.com/) for Claude API
+-   [OpenAI](https://openai.com/) for GPT-4o-mini API
 -   [Pinecone](https://www.pinecone.io/) for vector database
 -   [LangChain](https://langchain.com/) for AI frameworks
 -   [Express.js](https://expressjs.com/) for web framework

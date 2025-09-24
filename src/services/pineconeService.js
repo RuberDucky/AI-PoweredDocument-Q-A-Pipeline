@@ -149,6 +149,7 @@ class PineconeService {
                             documentId: doc.documentId,
                             chunkIndex: i,
                             totalChunks: chunks.length,
+                            userId: doc.userId, // Add user ID for filtering
                         },
                     });
                 }
@@ -168,7 +169,7 @@ class PineconeService {
         }
     }
 
-    async searchSimilar(query, topK = 5) {
+    async searchSimilar(query, topK = 5, userId = null) {
         try {
             if (!this.index) {
                 await this.initialize();
@@ -176,12 +177,21 @@ class PineconeService {
 
             const queryEmbedding = await this.createEmbedding(query);
 
-            const searchResults = await this.index.query({
+            const searchParams = {
                 vector: queryEmbedding,
                 topK,
                 includeMetadata: true,
                 includeValues: false,
-            });
+            };
+
+            // Add user filter if userId is provided
+            if (userId) {
+                searchParams.filter = {
+                    userId: { $eq: userId },
+                };
+            }
+
+            const searchResults = await this.index.query(searchParams);
 
             return searchResults.matches.map((match) => ({
                 id: match.id,

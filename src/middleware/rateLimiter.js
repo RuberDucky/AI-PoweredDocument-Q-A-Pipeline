@@ -21,7 +21,7 @@ const generalLimiter = createRateLimiter(
 
 const authLimiter = createRateLimiter(
     15 * 60 * 1000, // 15 minutes
-    5, // 5 attempts
+    15, // 15 attempts
     'Too many authentication attempts, please try again later.',
 );
 

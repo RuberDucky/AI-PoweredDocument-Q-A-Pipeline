@@ -1,6 +1,6 @@
 import { QASession } from '../models/index.js';
 import pineconeService from './pineconeService.js';
-import claudeService from './claudeService.js';
+import aiService from './claudeService.js';
 import logger from '../config/logger.js';
 
 class QAService {
@@ -9,16 +9,19 @@ class QAService {
             const startTime = Date.now();
 
             // Validate question
-            const validation = await claudeService.validateQuestion(question);
+            const validation = await aiService.validateQuestion(question);
             if (!validation.isValid) {
                 throw new Error(validation.message);
             }
 
-            // Search for relevant documents
-            logger.info(`Searching for documents related to: "${question}"`);
+            // Search for relevant documents (filtered by user)
+            logger.info(
+                `Searching for documents related to: "${question}" for user: ${userId}`,
+            );
             const relevantDocs = await pineconeService.searchSimilar(
                 question,
                 5,
+                userId, // Pass user ID to filter results
             );
 
             logger.info(`Found ${relevantDocs.length} relevant documents`);
@@ -45,8 +48,8 @@ class QAService {
                 };
             }
 
-            // Generate answer using Claude
-            const result = await claudeService.generateAnswer(
+            // Generate answer using OpenAI
+            const result = await aiService.generateAnswer(
                 question,
                 relevantDocs,
             );
