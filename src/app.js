@@ -52,77 +52,28 @@ class App {
 
     setupMiddleware() {
         // Security middleware
-        const isProduction = process.env.NODE_ENV === 'production';
         this.app.use(
             helmet({
                 contentSecurityPolicy: {
                     directives: {
                         defaultSrc: ["'self'"],
-                        scriptSrc: [
-                            "'self'",
-                            'https://accounts.google.com',
-                            'https://accounts.gstatic.com',
-                        ],
-                        scriptSrcElem: [
-                            "'self'",
-                            'https://accounts.google.com',
-                            'https://accounts.gstatic.com',
-                        ],
                         styleSrc: ["'self'", "'unsafe-inline'"],
-                        imgSrc: [
-                            "'self'",
-                            'data:',
-                            'https:',
-                            'https://lh3.googleusercontent.com',
-                            'https://accounts.google.com',
-                        ],
-                        connectSrc: ["'self'", 'https://accounts.google.com'],
-                        frameAncestors: ["'self'"],
-                        frameSrc: [
-                            'https://accounts.google.com',
-                            'https://accounts.gstatic.com',
-                        ],
+                        scriptSrc: ["'self'"],
+                        imgSrc: ["'self'", 'data:', 'https:'],
                     },
                 },
-                crossOriginEmbedderPolicy: isProduction, // relax for dev if needed
             }),
         );
 
         // CORS
-        const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
-            .split(',')
-            .map((o) => o.trim())
-            .filter(Boolean);
-
         this.app.use(
             cors({
-                origin: (origin, callback) => {
-                    // Allow non-browser requests or if no origin (like curl) and allow list defined
-                    if (!origin) return callback(null, true);
-                    if (allowedOrigins.length === 0) {
-                        // Fallback: allow all in development but warn
-                        if (!isProduction) {
-                            logger.warn(
-                                'ALLOWED_ORIGINS is empty; allowing all origins (development fallback).',
-                            );
-                            return callback(null, true);
-                        }
-                        return callback(
-                            new Error(
-                                'CORS blocked: no ALLOWED_ORIGINS configured in production',
-                            ),
-                        );
-                    }
-                    if (allowedOrigins.includes(origin)) {
-                        return callback(null, true);
-                    }
-                    logger.warn(`CORS blocked origin: ${origin}`);
-                    return callback(new Error('Not allowed by CORS'));
-                },
+                origin: process.env.ALLOWED_ORIGINS
+                    ? process.env.ALLOWED_ORIGINS.split(',')
+                    : '*',
                 credentials: true,
                 methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
                 allowedHeaders: ['Content-Type', 'Authorization'],
-                optionsSuccessStatus: 204,
             }),
         );
 

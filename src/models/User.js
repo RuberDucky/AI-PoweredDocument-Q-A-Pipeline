@@ -18,21 +18,6 @@ const User = sequelize.define(
                 len: [2, 100],
             },
         },
-        firstName: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            validate: { len: [1, 100] },
-        },
-        lastName: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            validate: { len: [1, 100] },
-        },
-        pictureUrl: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            validate: { isUrl: true },
-        },
         email: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -41,19 +26,9 @@ const User = sequelize.define(
                 isEmail: true,
             },
         },
-        googleId: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            unique: true,
-        },
-        authProvider: {
-            type: DataTypes.ENUM('local', 'google'),
-            allowNull: false,
-            defaultValue: 'local',
-        },
         password: {
             type: DataTypes.STRING,
-            allowNull: true, // Can be null for social logins
+            allowNull: true,
             validate: {
                 len: [6, 128],
             },
@@ -66,17 +41,13 @@ const User = sequelize.define(
     {
         hooks: {
             beforeCreate: async (user) => {
-                if (user.password) {
-                    const salt = await bcrypt.genSalt(12);
-                    user.password = await bcrypt.hash(user.password, salt);
-                }
+                const salt = await bcrypt.genSalt(12);
+                user.password = await bcrypt.hash(user.password, salt);
             },
             beforeUpdate: async (user) => {
                 if (user.changed('password')) {
-                    if (user.password) {
-                        const salt = await bcrypt.genSalt(12);
-                        user.password = await bcrypt.hash(user.password, salt);
-                    }
+                    const salt = await bcrypt.genSalt(12);
+                    user.password = await bcrypt.hash(user.password, salt);
                 }
             },
         },
@@ -84,7 +55,6 @@ const User = sequelize.define(
 );
 
 User.prototype.comparePassword = async function (candidatePassword) {
-    if (!this.password) return false;
     return bcrypt.compare(candidatePassword, this.password);
 };
 
