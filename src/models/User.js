@@ -33,6 +33,28 @@ const User = sequelize.define(
                 len: [6, 128],
             },
         },
+        googleId: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
+        },
+        firebaseUid: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
+        },
+        profilePicture: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            validate: {
+                isUrl: true,
+            },
+        },
+        authProvider: {
+            type: DataTypes.ENUM('local', 'google', 'firebase'),
+            defaultValue: 'local',
+            allowNull: false,
+        },
         isActive: {
             type: DataTypes.BOOLEAN,
             defaultValue: true,
@@ -41,11 +63,15 @@ const User = sequelize.define(
     {
         hooks: {
             beforeCreate: async (user) => {
-                const salt = await bcrypt.genSalt(12);
-                user.password = await bcrypt.hash(user.password, salt);
+                // Only hash password if it exists (for local auth users)
+                if (user.password) {
+                    const salt = await bcrypt.genSalt(12);
+                    user.password = await bcrypt.hash(user.password, salt);
+                }
             },
             beforeUpdate: async (user) => {
-                if (user.changed('password')) {
+                // Only hash password if it exists and has changed
+                if (user.password && user.changed('password')) {
                     const salt = await bcrypt.genSalt(12);
                     user.password = await bcrypt.hash(user.password, salt);
                 }
@@ -55,6 +81,10 @@ const User = sequelize.define(
 );
 
 User.prototype.comparePassword = async function (candidatePassword) {
+    // Return false if no password is set (OAuth users)
+    if (!this.password) {
+        return false;
+    }
     return bcrypt.compare(candidatePassword, this.password);
 };
 

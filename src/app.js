@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import session from 'express-session';
+import passport from 'passport';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -12,6 +14,8 @@ import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { generalLimiter } from './middleware/rateLimiter.js';
 import { createDirectories, validateEnvVars } from './utils/helpers.js';
 import pineconeService from './services/pineconeService.js';
+import firebaseConfig from './config/firebase.js';
+import './services/googleAuthService.js'; // Initialize passport strategies
 import logger from './config/logger.js';
 
 class App {
@@ -42,6 +46,9 @@ class App {
 
             // Initialize Pinecone
             await this.initializePinecone();
+
+            // Initialize Firebase
+            await this.initializeFirebase();
 
             logger.info('Application initialized successfully');
         } catch (error) {
@@ -92,6 +99,22 @@ class App {
         // Body parsing
         this.app.use(express.json({ limit: '10mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+        // Session configuration for passport
+        this.app.use(session({
+            secret: process.env.JWT_SECRET || 'fallback-secret-key',
+            resave: false,
+            saveUninitialized: false,
+            cookie: {
+                secure: process.env.NODE_ENV === 'production',
+                httpOnly: true,
+                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            }
+        }));
+
+        // Passport middleware
+        this.app.use(passport.initialize());
+        this.app.use(passport.session());
 
         // Trust proxy (for deployment behind reverse proxy)
         this.app.set('trust proxy', 1);
@@ -162,6 +185,17 @@ class App {
         } catch (error) {
             logger.error('Failed to initialize Pinecone service:', error);
             // Don't exit here as the app can still function without Pinecone
+            // but log the error for monitoring
+        }
+    }
+
+    async initializeFirebase() {
+        try {
+            await firebaseConfig.initialize();
+            logger.info('Firebase service initialized successfully');
+        } catch (error) {
+            logger.error('Failed to initialize Firebase service:', error);
+            // Don't exit here as the app can still function without Firebase
             // but log the error for monitoring
         }
     }
