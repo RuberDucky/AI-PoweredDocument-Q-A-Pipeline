@@ -32,7 +32,11 @@ router.get('/profile', authenticateToken, AuthController.getProfile);
 router.post('/logout', authenticateToken, AuthController.logout);
 
 // Firebase token verification route
-router.post('/firebase/verify', authLimiter, AuthController.verifyFirebaseToken);
+router.post(
+    '/firebase/verify',
+    authLimiter,
+    AuthController.verifyFirebaseToken,
+);
 
 // Google OAuth routes
 router.use('/', googleAuthRoutes);

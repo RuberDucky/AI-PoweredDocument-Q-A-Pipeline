@@ -23,16 +23,20 @@ class FirebaseConfig {
             // Path to the service account key file
             const serviceAccountPath = path.join(
                 __dirname,
-                '../serviceAccount/documind-778a7-firebase-adminsdk-fbsvc-4e8dfd25a7.json'
+                '../serviceAccount/documind-778a7-firebase-adminsdk-fbsvc-4e8dfd25a7.json',
             );
 
             // Check if service account file exists
             if (!fs.existsSync(serviceAccountPath)) {
-                throw new Error(`Firebase service account file not found at: ${serviceAccountPath}`);
+                throw new Error(
+                    `Firebase service account file not found at: ${serviceAccountPath}`,
+                );
             }
 
             // Read and parse the service account file
-            const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+            const serviceAccount = JSON.parse(
+                fs.readFileSync(serviceAccountPath, 'utf8'),
+            );
 
             // Initialize Firebase Admin SDK
             this.app = admin.initializeApp({
@@ -45,7 +49,7 @@ class FirebaseConfig {
 
             logger.info('Firebase Admin SDK initialized successfully', {
                 projectId: serviceAccount.project_id,
-                service: 'firebase'
+                service: 'firebase',
             });
 
             return this.app;
@@ -57,7 +61,9 @@ class FirebaseConfig {
 
     getAuth() {
         if (!this.initialized) {
-            throw new Error('Firebase not initialized. Call initialize() first.');
+            throw new Error(
+                'Firebase not initialized. Call initialize() first.',
+            );
         }
         return this.auth;
     }

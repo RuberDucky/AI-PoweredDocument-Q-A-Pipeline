@@ -80,14 +80,15 @@ class AuthController {
     static async googleAuth(req, res, next) {
         try {
             const authUrl = googleAuthService.getGoogleAuthURL();
-            
+
             res.status(200).json({
                 success: true,
                 message: 'Google OAuth URL generated',
                 data: {
                     authUrl: `${req.protocol}://${req.get('host')}${authUrl}`,
-                    instructions: 'Open this URL in a popup window for authentication'
-                }
+                    instructions:
+                        'Open this URL in a popup window for authentication',
+                },
             });
         } catch (error) {
             logger.error('Google auth URL generation error:', error);
@@ -102,26 +103,27 @@ class AuthController {
             if (!idToken) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Firebase ID token is required'
+                    message: 'Firebase ID token is required',
                 });
             }
 
             // Verify Firebase token and get/create user
-            const { user, decodedToken } = await googleAuthService.verifyFirebaseToken(idToken);
+            const { user, decodedToken } =
+                await googleAuthService.verifyFirebaseToken(idToken);
 
             // Generate JWT token for our application
             const token = jwt.sign(
-                { 
+                {
                     userId: user.id,
                     email: user.email,
                     firebaseUid: decodedToken.uid,
-                    authProvider: user.authProvider
+                    authProvider: user.authProvider,
                 },
                 process.env.JWT_SECRET,
-                { 
+                {
                     expiresIn: process.env.JWT_EXPIRES_IN || '24h',
-                    issuer: 'qa-pipeline'
-                }
+                    issuer: 'qa-pipeline',
+                },
             );
 
             logger.info(`Firebase auth successful for user: ${user.email}`);
@@ -131,17 +133,16 @@ class AuthController {
                 message: 'Authentication successful',
                 data: {
                     token,
-                    user: user.toJSON()
-                }
+                    user: user.toJSON(),
+                },
             });
-
         } catch (error) {
             logger.error('Firebase token verification error:', error);
-            
+
             if (error.message.includes('Invalid Firebase token')) {
                 return res.status(401).json({
                     success: false,
-                    message: 'Invalid Firebase token'
+                    message: 'Invalid Firebase token',
                 });
             }
 
