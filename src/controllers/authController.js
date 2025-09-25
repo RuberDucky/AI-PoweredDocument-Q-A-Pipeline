@@ -109,7 +109,10 @@ class AuthController {
             res.status(200).json({ success: true, data: { url } });
         } catch (error) {
             logger.error('Google OAuth start error:', error);
-            res.status(500).json({ success: false, message: 'Failed to generate Google OAuth URL' });
+            res.status(500).json({
+                success: false,
+                message: 'Failed to generate Google OAuth URL',
+            });
         }
     }
 
@@ -117,24 +120,44 @@ class AuthController {
         try {
             const { code, state } = req.query;
             if (!code) {
-                return res.status(400).json({ success: false, message: 'Authorization code missing' });
+                return res
+                    .status(400)
+                    .json({
+                        success: false,
+                        message: 'Authorization code missing',
+                    });
             }
             const result = await GoogleAuthService.handleOAuthCallback(code);
 
             // Decide response strategy: redirect with token (less secure) or JSON.
-            const frontend = process.env.FRONTEND_URL || 'http://localhost:5173';
+            const frontend =
+                process.env.FRONTEND_URL || 'http://localhost:5173';
             if (req.accepts('html') && !req.accepts('json')) {
                 // Fallback simple HTML auto-post (could be replaced with redirect carrying code in hash)
-                return res.send(`<!DOCTYPE html><html><body><script>window.opener && window.opener.postMessage(${JSON.stringify(
-                    { type: 'google-auth-success', token: result.token, user: result.user, state },
-                )}, '*'); window.close();</script>Success</body></html>`);
+                return res.send(
+                    `<!DOCTYPE html><html><body><script>window.opener && window.opener.postMessage(${JSON.stringify(
+                        {
+                            type: 'google-auth-success',
+                            token: result.token,
+                            user: result.user,
+                            state,
+                        },
+                    )}, '*'); window.close();</script>Success</body></html>`,
+                );
             }
 
             // Default JSON response (client handles storage)
-            res.status(200).json({ success: true, message: 'Google OAuth successful', data: result });
+            res.status(200).json({
+                success: true,
+                message: 'Google OAuth successful',
+                data: result,
+            });
         } catch (error) {
             logger.error('Google OAuth callback error:', error);
-            res.status(401).json({ success: false, message: error.message || 'Google OAuth failed' });
+            res.status(401).json({
+                success: false,
+                message: error.message || 'Google OAuth failed',
+            });
         }
     }
 }

@@ -27,7 +27,14 @@ class GoogleAuthService {
 
     async loginOrSignup(idToken) {
         const payload = await this.verifyIdToken(idToken);
-        const { sub: googleId, email, name, given_name, family_name, picture } = payload;
+        const {
+            sub: googleId,
+            email,
+            name,
+            given_name,
+            family_name,
+            picture,
+        } = payload;
 
         if (!email) {
             throw new Error('Google account has no verified email');
@@ -42,7 +49,10 @@ class GoogleAuthService {
         if (!user) {
             // Create new user (no password)
             user = await User.create({
-                fullName: name || [given_name, family_name].filter(Boolean).join(' ') || 'Google User',
+                fullName:
+                    name ||
+                    [given_name, family_name].filter(Boolean).join(' ') ||
+                    'Google User',
                 firstName: given_name || null,
                 lastName: family_name || null,
                 pictureUrl: picture || null,
@@ -72,11 +82,7 @@ class GoogleAuthService {
 
     // --- Authorization Code Flow Support ---
     getAuthUrl(state = '') {
-        const scopes = [
-            'openid',
-            'email',
-            'profile',
-        ];
+        const scopes = ['openid', 'email', 'profile'];
         const url = this.client.generateAuthUrl({
             access_type: 'offline',
             prompt: 'consent',

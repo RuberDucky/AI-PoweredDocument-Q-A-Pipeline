@@ -190,12 +190,12 @@ Google flow:
 
 Stored user profile fields now include:
 
-- `fullName`
-- `firstName` (parsed or from Google `given_name`)
-- `lastName` (parsed or from Google `family_name`)
-- `pictureUrl` (from Google `picture` claim if available)
-- `email`
-- `authProvider`
+-   `fullName`
+-   `firstName` (parsed or from Google `given_name`)
+-   `lastName` (parsed or from Google `family_name`)
+-   `pictureUrl` (from Google `picture` claim if available)
+-   `email`
+-   `authProvider`
 
 ### Google OAuth Authorization Code Flow (Alternative)
 
@@ -206,11 +206,13 @@ Endpoints:
 ```http
 GET /api/v1/auth/google/start
 ```
+
 Returns a JSON payload containing the `url` you should redirect the user to.
 
 ```http
 GET /api/v1/auth/google/callback?code=...&state=...
 ```
+
 Handles the Google redirect. It will exchange the code, create/link the user, and return JSON with the JWT. If opened in a popup it will also attempt to `postMessage` the token to the opener window.
 
 Environment variables required for this flow (already added to `.env.example`):
@@ -226,15 +228,15 @@ Sample frontend (popup) snippet:
 
 ```js
 async function startGoogleOAuth() {
-  const res = await fetch('http://localhost:3001/api/v1/auth/google/start');
-  const { data } = await res.json();
-  const popup = window.open(data.url, 'google_oauth', 'width=500,height=600');
-  window.addEventListener('message', (event) => {
-    if (event.data?.type === 'google-auth-success') {
-      localStorage.setItem('token', event.data.token);
-      popup && popup.close();
-    }
-  });
+    const res = await fetch('http://localhost:3001/api/v1/auth/google/start');
+    const { data } = await res.json();
+    const popup = window.open(data.url, 'google_oauth', 'width=500,height=600');
+    window.addEventListener('message', (event) => {
+        if (event.data?.type === 'google-auth-success') {
+            localStorage.setItem('token', event.data.token);
+            popup && popup.close();
+        }
+    });
 }
 ```
 
@@ -383,7 +385,7 @@ REACT_APP_GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.co
 
 After successful backend response store `token` and use it in Authorization header:
 
-```js
+````js
 const token = localStorage.getItem('token');
 fetch('/api/v1/documents', { headers: { Authorization: `Bearer ${token}` } });
 
@@ -398,10 +400,11 @@ res.cookie('auth_token', result.token, {
   sameSite: 'lax',
   maxAge: 24 * 60 * 60 * 1000,
 });
-```
+````
 
 Then the frontend omits manual storage and just sends credentials implicitly if same-site. For cross-site or different subdomains configure CORS and `withCredentials`.
-```
+
+````
 
 ### 1. Register a new user
 
@@ -413,7 +416,7 @@ curl -X POST http://localhost:3001/api/v1/auth/signup \
     "email": "alice@spamok.com",
     "password": "12345678"
   }'
-```
+````
 
 ### 2. Login and get token
 
