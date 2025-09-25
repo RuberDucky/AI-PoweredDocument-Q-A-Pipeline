@@ -172,6 +172,74 @@ GET /api/v1/auth/profile
 Authorization: Bearer <token>
 ```
 
+```http
+POST /api/v1/auth/google
+Content-Type: application/json
+
+{
+  "idToken": "GOOGLE_ID_TOKEN_FROM_FRONTEND"
+}
+```
+
+Google flow:
+
+1. Frontend obtains Google ID token via Google Identity Services.
+2. Sends ID token to backend endpoint `/api/v1/auth/google`.
+3. Backend verifies token, creates or links user, returns JWT.
+4. Frontend stores JWT (same as normal login) and uses it for subsequent API calls.
+
+Stored user profile fields now include:
+
+- `fullName`
+- `firstName` (parsed or from Google `given_name`)
+- `lastName` (parsed or from Google `family_name`)
+- `pictureUrl` (from Google `picture` claim if available)
+- `email`
+- `authProvider`
+
+### Google OAuth Authorization Code Flow (Alternative)
+
+This repository also supports the full OAuth authorization code flow if you prefer redirect-based login instead of directly sending an ID token from the frontend.
+
+Endpoints:
+
+```http
+GET /api/v1/auth/google/start
+```
+Returns a JSON payload containing the `url` you should redirect the user to.
+
+```http
+GET /api/v1/auth/google/callback?code=...&state=...
+```
+Handles the Google redirect. It will exchange the code, create/link the user, and return JSON with the JWT. If opened in a popup it will also attempt to `postMessage` the token to the opener window.
+
+Environment variables required for this flow (already added to `.env.example`):
+
+```
+GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:3001/api/v1/auth/google/callback
+FRONTEND_URL=http://localhost:5173
+```
+
+Sample frontend (popup) snippet:
+
+```js
+async function startGoogleOAuth() {
+  const res = await fetch('http://localhost:3001/api/v1/auth/google/start');
+  const { data } = await res.json();
+  const popup = window.open(data.url, 'google_oauth', 'width=500,height=600');
+  window.addEventListener('message', (event) => {
+    if (event.data?.type === 'google-auth-success') {
+      localStorage.setItem('token', event.data.token);
+      popup && popup.close();
+    }
+  });
+}
+```
+
+Security recommendation: prefer delivering the JWT via an HTTP-only, Secure cookie instead of returning it in JSON if you want stronger protection against XSS. (See Security section note.)
+
 ### Document Management
 
 ```http
@@ -253,6 +321,87 @@ The application now supports multiple document formats with advanced text extrac
 -   Maximum size: 25MB
 
 ## 🏃‍♂️ Usage Examples
+
+### Google Login (Frontend Integration Guide)
+
+React (using Google Identity Services):
+
+```jsx
+import { useEffect } from 'react';
+
+function GoogleLoginButton() {
+    useEffect(() => {
+        /* global google */
+        if (!window.google) return;
+        google.accounts.id.initialize({
+            client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+            callback: async (response) => {
+                try {
+                    const res = await fetch(
+                        'http://localhost:3001/api/v1/auth/google',
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                idToken: response.credential,
+                            }),
+                        },
+                    );
+                    const data = await res.json();
+                    if (data.success) {
+                        localStorage.setItem('token', data.data.token);
+                        // proceed with authenticated flow
+                    }
+                } catch (e) {
+                    console.error('Google auth failed', e);
+                }
+            },
+        });
+        google.accounts.id.renderButton(
+            document.getElementById('google-signin'),
+            { theme: 'outline', size: 'large' },
+        );
+    }, []);
+
+    return <div id="google-signin" />;
+}
+
+export default GoogleLoginButton;
+```
+
+Add script in `public/index.html`:
+
+```html
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+```
+
+Environment variable (`.env` in React app):
+
+```
+REACT_APP_GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
+```
+
+After successful backend response store `token` and use it in Authorization header:
+
+```js
+const token = localStorage.getItem('token');
+fetch('/api/v1/documents', { headers: { Authorization: `Bearer ${token}` } });
+
+#### Using HTTP-only Cookies (Optional Hardening)
+
+Instead of returning the JWT in JSON, you can set it server-side in the callback handler:
+
+```js
+res.cookie('auth_token', result.token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge: 24 * 60 * 60 * 1000,
+});
+```
+
+Then the frontend omits manual storage and just sends credentials implicitly if same-site. For cross-site or different subdomains configure CORS and `withCredentials`.
+```
 
 ### 1. Register a new user
 

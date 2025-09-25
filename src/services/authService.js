@@ -13,6 +13,17 @@ class AuthService {
     static async signup(userData) {
         try {
             const { fullName, email, password } = userData;
+            let firstName = null;
+            let lastName = null;
+            if (fullName) {
+                const parts = fullName.trim().split(/\s+/);
+                if (parts.length === 1) {
+                    firstName = parts[0];
+                } else if (parts.length > 1) {
+                    firstName = parts[0];
+                    lastName = parts.slice(1).join(' ');
+                }
+            }
 
             // Check if user already exists
             const existingUser = await User.findOne({ where: { email } });
@@ -23,6 +34,8 @@ class AuthService {
             // Create new user
             const user = await User.create({
                 fullName,
+                firstName,
+                lastName,
                 email,
                 password,
             });

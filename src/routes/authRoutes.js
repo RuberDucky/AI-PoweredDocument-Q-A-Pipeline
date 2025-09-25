@@ -25,6 +25,13 @@ router.post(
     AuthController.login,
 );
 
+// Google OAuth (ID Token direct on frontend)
+router.post('/google', authLimiter, AuthController.googleLogin);
+
+// Google OAuth Authorization Code Flow
+router.get('/google/start', authLimiter, AuthController.googleOAuthStart);
+router.get('/google/callback', AuthController.googleOAuthCallback);
+
 // Protected routes
 router.get('/profile', authenticateToken, AuthController.getProfile);
 
